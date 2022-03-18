@@ -208,16 +208,29 @@
     };
     ```
 
-1. wrap the page with `withUrqlClient`
+1. add `lib/urql/withStaticUrqlClient.ts` to wrap static generated pages
 
     ```ts
-    import { withUrqlClient, initUrqlClient, SSRData } from 'next-urql';
+    import { withUrqlClient } from 'next-urql';
+    import getUrqlClientOptions from './getUrqlClientOptions';
 
-    export default withUrqlClient(getUrqlClientOptions, {
-        neverSuspend: true, // don't use Suspend on server side
+    const withStaticUrqlClient = withUrqlClient(getUrqlClientOptions, {
+        neverSuspend: true, // don't use Suspense on server side
         ssr: false, // don't generate getInitialProps for the page
         staleWhileRevalidate: true, // tell client to do network-only data fetching again if the cached data is outdated
-    })(TestGraphql);
+    });
+
+    export default withStaticUrqlClient;
+    ```
+
+1. wrap the page with `withStaticUrqlClient`
+
+    ```ts
+    import withStaticUrqlClient from 'lib/urql/withStaticUrqlClient';
+
+    // ...
+
+    export default withStaticUrqlClient(Page);
     ```
 
 ## [GraqphQL Codegen](https://www.graphql-code-generator.com/docs/guides/react#optimal-configuration-for-apollo-and-urql)
@@ -255,8 +268,165 @@
 
 ## [Plasmic](https://docs.plasmic.app/learn/nextjs-quickstart)
 
+-   choose either integration method below depending on the usage of Plasmic
+
+### Use plasmic as [Headless API](https://docs.plasmic.app/learn/nextjs-quickstart)
+
 1. install plasmic dependencies
 
     ```sh
     pnpm i @plasmicapp/loader-nextjs
     ```
+
+1. add plasmic client
+
+    ```ts
+    import { initPlasmicLoader } from '@plasmicapp/loader-nextjs';
+
+    export const Plasmic = initPlasmicLoader({
+        projects: [
+            {
+                id: process.env.PLASMIC_ID || '',
+                token: process.env.PLASMIC_TOKEN || '',
+            },
+        ],
+        preview: true, // set false for production env
+    });
+    ```
+
+1. remove `pages/index.tsx`
+
+1. add `pages/[[...catchall]].tsx` to generate all pages created in plasmic studio
+
+    ```tsx
+    import {
+        ComponentRenderData,
+        PlasmicComponent,
+        PlasmicRootProvider,
+    } from '@plasmicapp/loader-nextjs';
+    import { Plasmic } from 'lib/plasmic/plasmic';
+    import withStaticUrqlClient from 'lib/urql/withStaticUrqlClient';
+    import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+    import Error from 'next/error';
+
+    export interface PageProps {
+        plasmicData?: ComponentRenderData;
+    }
+
+    /**
+     * Use fetchPages() to fetch list of pages that have been created in Plasmic
+     */
+    export const getStaticPaths: GetStaticPaths = async () => {
+        const pages = await Plasmic.fetchPages();
+        return {
+            paths: pages.map((page) => ({
+                params: {
+                    catchall: page.path.substring(1).split('/'),
+                },
+            })),
+            fallback: 'blocking',
+        };
+    };
+
+    /**
+     * For each page, pre-fetch the data we need to render it
+     */
+    export const getStaticProps: GetStaticProps<PageProps> = async (ctx) => {
+        const { catchall } = ctx.params ?? {};
+
+        const plasmicPath =
+            typeof catchall === 'string'
+                ? catchall
+                : Array.isArray(catchall)
+                ? `/${catchall.join('/')}`
+                : '/';
+
+        const plasmicData = await Plasmic.maybeFetchComponentData(plasmicPath);
+
+        if (plasmicData) {
+            return {
+                props: {
+                    plasmicData,
+                },
+                revalidate: 300,
+            };
+        } else {
+            return {
+                props: {},
+            };
+        }
+    };
+
+    const CatchallPage: NextPage<PageProps> = ({ plasmicData }) => {
+        if (!plasmicData || plasmicData.entryCompMetas.length === 0) {
+            return <Error statusCode={404} />;
+        }
+        const pageMeta = plasmicData.entryCompMetas[0];
+        return (
+            // Pass in the data fetched in getStaticProps as prefetchedData
+            <PlasmicRootProvider loader={Plasmic} prefetchedData={plasmicData}>
+                {
+                    // plasmicData.entryCompMetas[0].name contains the name
+                    // of the component you fetched.
+                }
+                <PlasmicComponent component={pageMeta.name} />
+            </PlasmicRootProvider>
+        );
+    };
+
+    export default withStaticUrqlClient(CatchallPage);
+    ```
+
+1. add `pages/plasmic-host.tsx` to preview the pages on plasmic studio
+
+    ```tsx
+    import { PlasmicCanvasHost } from '@plasmicapp/loader-nextjs';
+    import { Plasmic } from 'lib/plasmic/plasmic';
+    import withStaticUrqlClient from 'lib/urql/withStaticUrqlClient';
+    import Script from 'next/script';
+
+    const PlasmicHost = () => {
+        return (
+            Plasmic && (
+                <div>
+                    <Script
+                        src="https://static1.plasmic.app/preamble.js"
+                        strategy="beforeInteractive"
+                    />
+                    <PlasmicCanvasHost />
+                </div>
+            )
+        );
+    };
+
+    export default withStaticUrqlClient(PlasmicHost);
+    ```
+
+1. configure plasmic studio project settings to preview the project using `http://localhost:3000/plasmic-host`
+
+### Use plasmic to [code generate](https://docs.plasmic.app/learn/codegen-guide/) components
+
+1. install plasmic dependencies
+
+    ```sh
+    pnpm i -g @plasmicapp/cli
+    pnpm i @plasmicapp/react-web
+    ```
+
+1. authenticate plasmic cli
+
+    ```sh
+    plasmic auth
+    ```
+
+1. create a project on plasmic studio if not yet done
+
+1. note the project id in the url, i.e. `fyLUsDXMW8eJuJ9WwfAaag` in `https://studio.plasmic.app/projects/fyLUsDXMW8eJuJ9WwfAaag,`
+
+1. sync plasmic studio project down as react components
+
+    ```sh
+    plasmic sync -p <project-id>
+    ```
+
+1. continue designing and using the generated pages and components in `pages/` and `components/` folder using the default setup
