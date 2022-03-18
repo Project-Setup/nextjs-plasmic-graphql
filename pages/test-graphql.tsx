@@ -1,6 +1,6 @@
 import type { GetStaticProps, NextPage } from 'next';
 import styles from 'styles/Home.module.css';
-import { withUrqlClient, initUrqlClient, SSRData } from 'next-urql';
+import { initUrqlClient, SSRData } from 'next-urql';
 import { ssrExchange, useQuery } from 'urql';
 import getUrqlClientOptions from 'lib/urql/getUrqlClientOptions';
 import {
@@ -8,8 +8,9 @@ import {
   GetPostByIdQuery,
   GetPostByIdQueryVariables,
 } from 'graphql/generated';
-interface PageProps {
-  urqlState: SSRData;
+import withStaticUrqlClient from 'lib/urql/withStaticUrqlClient';
+export interface PageProps {
+  urqlState?: SSRData;
 }
 
 export const getStaticProps: GetStaticProps<PageProps> = async () => {
@@ -17,7 +18,7 @@ export const getStaticProps: GetStaticProps<PageProps> = async () => {
   const urqlClientOption = getUrqlClientOptions(ssrCache);
   const client = initUrqlClient(urqlClientOption, false);
 
-  const result = await client
+  await client
     ?.query<GetPostByIdQuery, GetPostByIdQueryVariables>(GetPostByIdDocument, {
       id: '1',
     })
@@ -75,8 +76,4 @@ const TestGraphql: NextPage<PageProps> = (props) => {
   );
 };
 
-export default withUrqlClient(getUrqlClientOptions, {
-  neverSuspend: true, // don't use Suspend on server side
-  ssr: false, // don't generate getInitialProps for the page
-  staleWhileRevalidate: true, // tell client to do network-only data fetching again if the cached data is outdated
-})(TestGraphql);
+export default withStaticUrqlClient(TestGraphql);

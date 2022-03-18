@@ -229,7 +229,7 @@
     pnpm i -D @graphql-codegen/cli @graphql-codegen/typed-document-node @graphql-codegen/typescript @graphql-codegen/typescript-operations
     ```
 
-2. add `lib/graphql-codegen/codegen.yml`
+1. add `lib/graphql-codegen/codegen.yml`
 
     ```yml
     schema: <html-to-graphql-endpoint-or-path-to-server-graphql>
@@ -244,11 +244,19 @@
         fetcher: fetch
     ```
 
-3. add to `package.json`
+1. add to `package.json`
     ```json
     {
         "scripts": {
             "codegen": "graphql-codegen --config lib/grpahql-codegen/codegen.yml"
         }
     }
+    ```
+
+## [Plasmic](https://docs.plasmic.app/learn/nextjs-quickstart)
+
+1. install plasmic dependencies
+
+    ```sh
+    pnpm i @plasmicapp/loader-nextjs
     ```

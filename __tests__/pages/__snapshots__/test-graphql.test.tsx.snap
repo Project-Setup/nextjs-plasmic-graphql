@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TestGraphql renders page unchanged 1`] = `
+<div>
+  <div
+    class="container"
+  >
+    <h1
+      class="title"
+    >
+      Graphql Tester
+    </h1>
+    <div
+      class="grid"
+    >
+      <div
+        class="graphql-container"
+      >
+        <button
+          class="card"
+          type="button"
+        >
+          try fetch
+        </button>
+        <div
+          class="grapql-result"
+        >
+          <p
+            class="code"
+          />
+        </div>
+      </div>
+    </div>
+    <style>
+      
+        .graphql-testing-container {
+          display: flex;
+          flex-flow: row nowrap;
+          justify-content: space-between;
+          align-items: flex-start;
+        }
+        .graphql-testing-container &gt; div {
+          width: 100%;
+          border-color: black;
+        }
+        button.card {
+          cursor: pointer;
+          background: transparent;
+        }
+        button.card:active {
+          border-color: lightblue;
+          color: lightblue;
+        }
+      
+    </style>
+  </div>
+</div>
+`;

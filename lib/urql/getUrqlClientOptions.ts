@@ -3,10 +3,11 @@ import { cacheExchange } from '@urql/exchange-graphcache';
 import { NextUrqlClientConfig } from 'next-urql';
 import { debugExchange, dedupExchange, fetchExchange } from 'urql';
 import getIsClient from 'lib/utils/getIsClient';
+import getIsProduction from 'lib/utils/getIsProduction';
 
 const getUrqlClientOptions: NextUrqlClientConfig = (ssrCache) => {
   const isClient = getIsClient();
-  const isProd = process.env.NEXT_PUBLIC_ENV === 'production';
+  const isProd = getIsProduction();
   return {
     url: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || '',
     exchanges: [
