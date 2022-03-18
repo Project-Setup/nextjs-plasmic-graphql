@@ -49,3 +49,5 @@
     });
     // ...
     ```
+
+-   Write tests in `__tests__` folder with filename `*.test.ts(x)`
