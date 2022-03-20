@@ -1,4 +1,6 @@
-# Nextjs Website
+# Nextjs + Plasmic
+
+-   This project starter uses nextjs (v.12.1.0) and plasmic.app by using urql (a lightweight graqphql client).
 
 ## Setup
 

@@ -44,5 +44,21 @@
     "jest": "^27.5.1",
     "prettier": "^2.5.1",
     "typescript": "4.6.2"
-  }
+  },
+  "description": "## Setup",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Project-Setup/nextjs-plasmic-graphql.git"
+  },
+  "keywords": [
+    "nextjs",
+    "plasmic",
+    "graphql"
+  ],
+  "author": "David Chen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Project-Setup/nextjs-plasmic-graphql/issues"
+  },
+  "homepage": "https://github.com/Project-Setup/nextjs-plasmic-graphql#readme"
 }
