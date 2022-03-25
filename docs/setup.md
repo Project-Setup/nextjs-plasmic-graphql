@@ -108,6 +108,7 @@
     });
 
     const customJestConfig = {
+        rootDir: '../',
         setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
         moduleDirectories: ['node_modules', '<rootDir>/'],
         testRegex: '__tests__/.*\\.test\\.tsx?$',
@@ -175,9 +176,9 @@
     export const USER_QUERY = `
         query {
             post(id: 1) {
-            id
-            title
-            body
+                id
+                title
+                body
             }
         }
     `;
@@ -190,14 +191,19 @@
     import getUrqlClientOptions from 'lib/urql/getUrqlClientOptions';
     import { initUrqlClient } from 'next-urql';
     import { USER_QUERY } from 'graphql/query/userQuery';
-    import { ssrExchange, useQuery } from 'urql';
+    import { ssrExchange } from 'urql';
+    import { WithUrqlState } from 'next-urql';
 
-    export const getStaticProps: GetStaticProps<PageProps> = async () => {
+    export interface PageProps {}
+
+    export interface StaticProps extends WithUrqlState, PageProps {}
+
+    export const getStaticProps: GetStaticProps<StaticProps> = async () => {
         const ssrCache = ssrExchange({ isClient: false });
         const urqlClientOption = getUrqlClientOptions(ssrCache);
         const client = initUrqlClient(urqlClientOption, false);
 
-        const result = await client?.query(USER_QUERY).toPromise();
+        await client?.query(USER_QUERY).toPromise();
 
         return {
             props: {
@@ -248,13 +254,13 @@
     schema: <html-to-graphql-endpoint-or-path-to-server-graphql>
     documents: './graphql/**/*.graphql' # custom frontend query or mutation defined in graphql
     generates:
-    ./graphql/generated.ts:
-        plugins:
-            - typescript
-            - typescript-operations
-            - typed-document-node
-        config:
-        fetcher: fetch
+        ./graphql/generated.ts:
+            plugins:
+                - typescript
+                - typescript-operations
+                - typed-document-node
+            config:
+                fetcher: fetch
     ```
 
 1. add to `package.json`

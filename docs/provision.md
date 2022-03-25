@@ -19,3 +19,7 @@ npm i -g pnpm
 ```sh
 $ pnpm install
 ```
+
+## Set Environment Variables
+
+-   set the correct env vars in `.env` and `.env.local` if necessary
