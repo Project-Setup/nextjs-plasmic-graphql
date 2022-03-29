@@ -93,7 +93,7 @@
 
 1. install jest and react-testing-library
     ```sh
-    pnpm i -D jest @testing-library/react @testing-library/jest-dom
+    pnpm i -D jest @jest/types @testing-library/react @testing-library/jest-dom
     ```
 1. add `__tests__/` folder
     ```sh
