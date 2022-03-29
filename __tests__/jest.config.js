@@ -4,6 +4,7 @@ const createJestConfig = nextJest({
   dir: './',
 });
 
+/** @type {import('@jest/types').Config.InitialOptions} */
 const customJestConfig = {
   rootDir: '../',
   setupFilesAfterEnv: ['<rootDir>/__tests__/jest.setup.ts'],

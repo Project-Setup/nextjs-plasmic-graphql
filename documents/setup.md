@@ -62,6 +62,7 @@
 1. add `.eslintrc.js`
 
     ```js
+    /** @type {import('eslint').Linter.Config} */
     module.exports = {
         extends: ['next', 'prettier', 'plugin:prettier/recommended'],
     };
@@ -107,6 +108,7 @@
         dir: './',
     });
 
+    /** @type {import('@jest/types').Config.InitialOptions} */
     const customJestConfig = {
         rootDir: '../',
         setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
